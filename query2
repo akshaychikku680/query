@@ -1,0 +1,424 @@
+create database online_store
+
+1. Write SQL statements to create the tables as described in the database schema
+
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    FirstName VARCHAR(255),
+    LastName VARCHAR(255),
+    Email VARCHAR(255),
+    Phone VARCHAR(20),
+    RegistrationDate DATE
+);
+
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(255),
+    Category VARCHAR(50),
+    Price DECIMAL(10, 2),
+    StockQuantity INT
+);
+
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    OrderDate DATE,
+    CustomerID INT,
+    TotalAmount DECIMAL(10, 2),
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+
+CREATE TABLE OrderDetails (
+    OrderDetailID INT PRIMARY KEY,
+    OrderID INT,
+    ProductID INT,
+    Quantity INT,
+    Price DECIMAL(10, 2),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+ 2. Insert Data
+ 
+INSERT INTO Customers VALUES (1, 'John', 'Doe', 'john@example.com', '123-456-7890', '2024-07-02'),
+ (2,'Jane', 'Smith', 'jane.smith@example.com', '234-567-8901', '2023-02-20'),
+ (3,'Alice', 'Johnson', 'alice.johnson@example.com', '345-678-9012', '2023-03-10'),
+ (4,'Bob', 'Brown', 'bob.brown@example.com', '456-789-0123', '2023-04-05'),
+ (5,'Charlie', 'Davis', 'charlie.davis@example.com', '567-890-1234', '2023-05-12'),
+ (6,'David', 'Wilson', 'david.wilson@example.com', '678-901-2345', '2023-06-15'),
+ (7,'Emma', 'Thomas', 'emma.thomas@example.com', '789-012-3456', '2023-07-01'),
+ (8,'Fiona', 'Garcia', 'fiona.garcia@example.com', '890-123-4567', '2023-07-10'),
+ (9,'George', 'Martinez', 'george.martinez@example.com', '901-234-5678', '2023-07-20'),
+ (10,'Hannah', 'Rodriguez', 'hannah.rodriguez@example.com', '012-345-6789', '2023-07-25');
+ 
+ INSERT INTO Products VALUES  (1,'Laptop', 'Electronics', 999.99, 50),
+ (2,'Smartphone', 'Electronics', 499.99, 100),
+ (3,'Tablet', 'Electronics', 299.99, 75),
+ (4,'Headphones', 'Accessories', 49.99, 200),
+ (5,'Charger', 'Accessories', 19.99, 300),
+ (6,'Keyboard', 'Accessories', 29.99, 150),
+ (7,'Mouse', 'Accessories', 19.99, 250),
+ (8,'Monitor', 'Electronics', 199.99, 30),
+ (9,'Printer', 'Electronics', 149.99, 20),
+(10,'USB Cable', 'Accessories', 9.99, 400)
+
+INSERT INTO Orders VALUES (1,'2023-06-01', 1, 1049.98),
+ (2,'2023-06-05', 2, 549.98),
+ (3,'2023-06-10', 3, 999.99),
+ (4,'2023-06-15', 4, 69.98),
+ (5,'2023-06-20', 5, 519.98),
+ (6,'2023-06-25', 6, 229.98),
+ (7,'2023-07-02', 7, 1199.97),
+ (8,'2023-07-12', 8, 49.98),
+ (9,'2023-07-18', 9, 349.98),
+ (10,'2023-07-22', 10, 39.98)
+ 
+ INSERT INTO OrderDetails VALUES  (1,1, 1, 1, 999.99), 
+ (2,1, 4, 1, 49.99), 
+ (3,2, 2, 1, 499.99), 
+ (4,2, 5, 1, 49.99), 
+ (5,3, 1, 1, 999.99), 
+ (6,4, 4, 1, 49.99), 
+ (7,4, 5, 1, 19.99), 
+ (8,5, 2, 1, 499.99), 
+ (9,5, 5, 1, 19.99),
+ (10,6, 3, 1, 199.99), 
+ (11,6, 5, 1, 29.99),
+ (12,7, 1, 1, 999.99), 
+ (13,7, 3, 1, 199.99), 
+ (14,4, 8, 1, 49.99), 
+ (15,8, 7, 1, 19.99), 
+ (16,8, 8, 1, 29.99), 
+ (17,9, 4, 2, 149.99), 
+ (18,9, 9, 1, 49.99), 
+ (19,10, 10, 4, 9.99)
+ 
+3. Retrieve all customers who registered in 2023.
+
+Query:
+	select * from Customers where year(RegistrationDate) = '2023'
+
+output:
+CustomerID  FirstName  LastName   Email                         Phone           RegistrationDate
+2           Jane       Smith      jane.smith@example.com        234-567-8901    2023-02-20
+3           Alice      Johnson    alice.johnson@example.com     345-678-9012    2023-03-10
+4           Bob        Brown      bob.brown@example.com         456-789-0123    2023-04-05
+5           Charlie    Davis      charlie.davis@example.com     567-890-1234    2023-05-12
+6           David      Wilson     david.wilson@example.com      678-901-2345    2023-06-15
+7           Emma       Thomas     emma.thomas@example.com       789-012-3456    2023-07-01
+8           Fiona      Garcia     fiona.garcia@example.com      890-123-4567    2023-07-10
+9           George     Martinez   george.martinez@example.com   901-234-5678    2023-07-20
+10          Hannah     Rodriguez  hannah.rodriguez@example.com  012-345-6789    2023-07-25
+
+ 
+4. List all products in the 'Electronics' category.
+
+Query:
+	select * from Products where Category='Electronics'
+
+output:
+ProductID  ProductName   Category      Price    StockQuantity
+1          Laptop        Electronics   999.99   50
+2          Smartphone    Electronics   499.99   100
+3          Tablet        Electronics   299.99   75
+8          Monitor       Electronics   199.99   30
+9          Printer       Electronics   149.99   20
+
+
+5. Find the total number of orders placed by each customer.
+
+Query:
+    select c.customerid, c.firstname, c.lastname, count(o.orderid) as totalorders
+    from customers c 
+	  left join orders o on c.customerid = o.customerid 
+    group by c.customerid , c.firstname , c.lastname
+
+output:
+customerid  firstname   lastname   totalorders
+1           John        Doe        1
+2           Jane        Smith      1
+3           Alice       Johnson    1
+4           Bob         Brown      1
+5           Charlie     Davis      1
+6           David       Wilson     1
+7           Emma        Thomas     1
+8           Fiona       Garcia     1
+9           George      Martinez   1
+10          Hannah      Rodriguez  1
+
+    
+6. Calculate the total sales amount for each product.
+
+Query:
+	select p.productid, p.productname, sum(od.quantity * od.price) as TotalSalesAmount
+	from products p
+	join orderdetails od on p.productid = od.productid
+	group by p.productid, p.productname
+
+output:
+productid  productname  TotalSalesAmount
+1          Laptop       2999.97
+4          Headphones   399.96
+2          Smartphone   999.98
+5          Charger      119.96
+3          Tablet       399.98
+8          Monitor      79.98
+7          Mouse        19.99
+9          Printer      49.99
+10         USB Cable    39.96
+
+    
+7. Retrieve the details of all orders, including the customer name and total amount.
+
+Query:
+	select o.orderid, concat(c.firstname,' ',c.lastname) as CustomerName, o.TotalAmount
+	from orders o
+	join customers c ON o.customerid = c.customerid
+
+output:
+orderid  CustomerName      TotalAmount
+1        John Doe          1049.98'
+2        Jane Smith        549.98'
+3        Alice Johnson     999.99'
+4        Bob Brown         69.98'
+5        Charlie Davis     519.98'
+6        David Wilson      229.98'
+7        Emma Thomas       1199.97'
+8        Fiona Garcia      49.98'
+9        George Martinez   349.98'
+10       Hannah Rodriguez  39.98'
+
+    
+ 8. List all products that have been ordered along with the quantity ordered for each.
+
+Query:
+	select p.productid, p.productname, sum(od.quantity) as TotalQuantityOrdered
+	from products p
+	join orderdetails od on p.productid = od.productid
+  group by p.productid, p.productname
+
+output:
+productid  productname  TotalQuantityOrdered
+1          Laptop       3
+4          Headphones   4
+2          Smartphone   2
+5          Charger      4
+3          Tablet       2
+8          Monitor      2
+7          Mouse        1
+9          Printer      1
+10         USB Cable    4
+
+    
+ 9. Find the order details for orders placed by 'John Doe'.
+
+Query:
+	select   o.orderid, o.orderdate, concat(c.firstname,' ',c.lastname) as CustomerName, p.productid, p.productname, od.quantity, od.price
+	from orders o
+	join customers c on o.customerid = c.customerid
+	join orderdetails od on o.orderid = od.orderid
+	join products p ON od.productid = p.productid
+	where c.firstname = 'John' and c.lastname = 'Doe'
+
+output:
+orderid  orderdate   CustomerName  productid  productname  quantity  price
+1        2023-06-01  John Doe      1          Laptop       1         999.99
+1        2023-06-01  John Doe      4          Headphones   1         49.99
+
+    
+ 10. Find customers who have placed an order totaling more than $500.
+
+Query:
+	select c.customerid,concat(c.firstname,' ',c.lastname) as CustomerName, o.totalamount 
+	from customers c
+	join orders o on c.customerid = o.customerid
+	where o.totalamount > 500
+
+output:
+customerid  CustomerName   totalamount
+1           John Doe       1049.98
+2           Jane Smith     549.98
+3           Alice Johnson  999.99
+5           Charlie Davis  519.98
+7           Emma Thomas    1199.97
+
+
+11. List the products that have never been ordered.
+
+Query:
+	select p.productid, p.productname
+	from products p
+	left join orderdetails od on p.productid = od.productid
+	where od.orderdetailid is null
+
+output:
+productid  productname
+6          Keyboard
+
+
+12. Retrieve the order history for a specific customer, including order date, product names,
+ and quantities. (Assume customer ID is 2)
+
+Query:
+	select concat(c.firstname,' ',c.lastname) as CustomerName, o.orderdate, p.productname, od.quantity
+	from orders o
+	join customers c on o.customerid = c.customerid
+	join orderdetails od on o.orderid = od.orderid
+	join products p on od.productid = p.productid
+	where c.customerid = 2
+
+output:
+CustomerName  orderdate   productname  quantity
+Jane Smith    2023-06-05  Smartphone   1
+Jane Smith    2023-06-05  Charger      1
+
+    
+13. Calculate the average order value for each customer.
+
+Query:
+	select c.customerid, concat(c.firstname,' ',c.lastname) as customername,
+  avg(o.totalamount) as AverageOrderValue
+	from customers c
+	join orders o on c.customerid = o.customerid
+	group by c.customerid, c.firstname, c.lastname
+
+output:
+customerid  customername      AverageOrderValue
+1           John Doe          1049.980000
+2           Jane Smith        549.980000
+3           Alice Johnson     999.990000
+4           Bob Brown         69.980000
+5           Charlie Davis     519.980000
+6           David Wilson      229.980000
+7           Emma Thomas       1199.970000
+8           Fiona Garcia      49.980000
+9           George Martinez   349.980000
+10          Hannah Rodriguez  39.980000
+
+    
+ 14. Find the most popular product category based on the number of orders
+
+Query:
+	select p.category, count(o.orderid) as OrderCount
+	from products p
+	join orderdetails od on p.productid = od.productid
+	join orders o on od.orderid = o.orderid
+	group by p.category
+	order by OrderCount desc limit 1
+
+output:
+category     OrderCount
+Electronics  10
+
+    
+ 15. List all customers who have ordered more than one product in a single order.
+
+Query:
+	select c.customerid, concat(c.firstname,' ',c.lastname) as customername
+	from customers c
+	join orders o on c.customerid = o.customerid
+  join orderdetails od on o.orderid = od.orderid
+	group by c.customerid, c.firstname, c.lastname
+	having count(distinct od.productid) > 1
+
+output:
+customerid  customername
+1           John Doe
+2           Jane Smith
+4           Bob Brown
+5           Charlie Davis
+6           David Wilson
+7           Emma Thomas
+8           Fiona Garcia
+9           George Martinez
+
+    
+ 16. Find the total revenue generated from each product category.
+
+Query:
+	select p.category, sum(od.quantity * p.price) as TotalRevenue
+	from products p
+	join orderdetails od on p.productid = od.productid
+	group by p.category
+
+output:
+category     TotalRevenue
+Electronics  5149.90
+Accessories  339.87
+
+    
+17. Retrieve the list of customers along with the total amount they have spent.
+
+Query:
+	select c.customerid, concat(c.firstname,' ',c.lastname) as CustomerName, sum(o.totalamount) as TotalSpent
+	from customers c
+	join orders o on c.customerid = o.customerid
+	group by c.customerid, c.firstname, c.lastname
+
+output:
+customerid  CustomerName      TotalSpent 
+1           John Doe          1049.98
+2           Jane Smith        549.98
+3           Alice Johnson     999.99
+4           Bob Brown         69.98
+5           Charlie Davis     519.98
+6           David Wilson      229.98
+7           Emma Thomas       1199.97
+8           Fiona Garcia      49.98
+9           George Martinez   349.98
+10          Hannah Rodriguez  39.98
+
+    
+18. Find the average price of products in each category.
+
+Query:
+	select category,avg(price) as AveragePrice
+	from products
+	group by category
+
+output:
+category     AveragePrice
+Electronics  429.990000
+Accessories  25.990000
+
+    
+19. Find all customers who have not placed any orders.
+
+Query:
+	select c.customerid, concat(c.firstname,' ',c.lastname) as CustomerName
+	from customers c
+	left join orders o on c.customerid = o.customerid
+	where o.orderid is null
+
+output:
+customerid  CustomerName
+null        null
+    
+ 20. List the top 3 products with the highest total sales amount.
+
+Query:
+	select p.productname, sum(od.quantity * od.price) as TotalSalesAmount
+	from products p
+	join orderdetails od on p.productid = od.productid
+	group by p.productname
+	order by TotalSalesAmount desc limit 3
+
+output:
+productname  TotalSalesAmount
+Laptop       2999.97
+Smartphone   999.98
+Tablet       399.98
+
+    
+ 21. Find customers who have placed orders for more than 3 different products
+
+Query:
+	select c.customerid, concat(c.firstname,' ',c.lastname) as CustomerName
+	from customers c
+	join orders o on c.customerid = o.customerid
+	join orderdetails od on o.orderid = od.orderid
+	group by c.customerid, c.firstname, c.lastname
+	having count(distinct od.productid) > 3
+
+output:
+customerid  CustomerName
+null        null
